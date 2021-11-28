@@ -17,7 +17,12 @@
 #include "../unhvd.h"
 
 #include <iostream>
-#include <unistd.h> //usleep, note that this is not portable
+
+#ifdef _WINDOWS
+#include <windows.h>//Sleep()
+#else
+#include <unistd.h> //usleep()
+#endif // #ifdef _WINDOWS
 
 using namespace std;
 
@@ -100,7 +105,11 @@ void main_loop(unhvd *network_decoder)
 
 		//this should spin once per frame rendering
 		//so wait until we are after rendering
+#ifdef _WINDOWS
+		Sleep(SLEEP_US / 1000);
+#else
 		usleep(SLEEP_US);
+#endif
 	}
 }
 
