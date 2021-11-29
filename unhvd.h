@@ -191,7 +191,7 @@ enum unhvd_retval_enum
  *
  * @see unhvd_net_config, unhvd_hw_config, unhvd_depth_config
  */
-UNHVD_EXPORT UNHVD_API struct unhvd *unhvd_init(
+UNHVD_EXPORT struct unhvd * UNHVD_API unhvd_init(
 	const unhvd_net_config *net_config,
 	const unhvd_hw_config *hw_config, int hw_size,
 	const unhvd_depth_config *depth_config);
@@ -205,7 +205,7 @@ UNHVD_EXPORT UNHVD_API struct unhvd *unhvd_init(
  * @see unhvd_init
  *
  */
-UNHVD_EXPORT UNHVD_API void unhvd_close(unhvd *u);
+UNHVD_EXPORT void UNHVD_API unhvd_close(unhvd *u);
 
 
 /** @name Data retrieval functions
@@ -242,17 +242,17 @@ UNHVD_EXPORT UNHVD_API void unhvd_close(unhvd *u);
  * Point cloud data may be only retrieved if non NULL ::unhvd_depth_config was passed to ::unhvd_init.
  * This function may retrieve both depth frame and unprojected point cloud at the same time
  */
-UNHVD_EXPORT UNHVD_API int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc);
+UNHVD_EXPORT int UNHVD_API unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc);
 /** @brief Finish retrieval. */
-UNHVD_EXPORT UNHVD_API int unhvd_get_end(unhvd *u);
+UNHVD_EXPORT int UNHVD_API unhvd_get_end(unhvd *u);
 /** @brief Retrieve video frame. */
-UNHVD_EXPORT UNHVD_API int unhvd_get_frame_begin(unhvd *u, unhvd_frame *frame);
+UNHVD_EXPORT int UNHVD_API unhvd_get_frame_begin(unhvd *u, unhvd_frame *frame);
 /** @brief Finish retrieval. */
-UNHVD_EXPORT UNHVD_API int unhvd_get_frame_end(unhvd *u);
+UNHVD_EXPORT int UNHVD_API unhvd_get_frame_end(unhvd *u);
 /** @brief Retrieve point cloud. */
-UNHVD_EXPORT UNHVD_API int unhvd_get_point_cloud_begin(unhvd *u, unhvd_point_cloud *pc);
+UNHVD_EXPORT int UNHVD_API unhvd_get_point_cloud_begin(unhvd *u, unhvd_point_cloud *pc);
 /** @brief Finish retrieval. */
-UNHVD_EXPORT UNHVD_API int unhvd_get_point_cloud_end(unhvd *u);
+UNHVD_EXPORT int UNHVD_API unhvd_get_point_cloud_end(unhvd *u);
 ///@}
 
 /** @}*/
