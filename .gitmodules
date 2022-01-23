@@ -3,4 +3,4 @@
 	url = https://github.com/CitizenOneX/network-hardware-video-decoder.git
 [submodule "hardware-depth-unprojector"]
 	path = hardware-depth-unprojector
-	url = https://github.com/bmegli/hardware-depth-unprojector.git
+	url = https://github.com/CitizenOneX/hardware-depth-unprojector.git

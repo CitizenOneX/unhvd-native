@@ -159,7 +159,7 @@ typedef uint32_t color32;
 struct unhvd_point_cloud
 {
 	float3 *data; //!< array of point coordinates
-	color32 *colors; //!< array of point colors
+	uint8_t *colors; //!< array of point colors
 	int size; //!< size of array
 	int used; //!< number of elements used in array
 };

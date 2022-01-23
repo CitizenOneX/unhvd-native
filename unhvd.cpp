@@ -108,6 +108,14 @@ struct unhvd *unhvd_init(
 static void unhvd_network_decoder_thread(unhvd *u)
 {
 	AVFrame *frames[UNHVD_MAX_DECODERS];
+	// just try initialising these frames to NULL because for some reason
+	// I'm getting a non-NULL texture frame when sending/decoding only depth data
+	// I think this was a bug
+	for (int i = 0; i < UNHVD_MAX_DECODERS; i++)
+	{
+		frames[i] = NULL;
+	}
+
 	int status;
 
 
@@ -148,12 +156,14 @@ static void unhvd_network_decoder_thread(unhvd *u)
 
 static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, const AVFrame *texture_frame, hdu_point_cloud *pc)
 {
+	// seems to be matching AV_PIX_FMT_YUV420P10LE(64)
 	if(depth_frame->linesize[0] / depth_frame->width != 2 ||
-		(depth_frame->format != AV_PIX_FMT_P010LE && depth_frame->format != AV_PIX_FMT_P016LE))
+		(depth_frame->format != AV_PIX_FMT_P010LE && depth_frame->format != AV_PIX_FMT_P016LE && depth_frame->format != AV_PIX_FMT_YUV420P10LE))
 		return UNHVD_ERROR_MSG("unhvd_unproject_depth_frame expects uint16 p010le/p016le data");
 
+	// seems to be matching AV_PIX_FMT_YUV420P
 	if(texture_frame && texture_frame->data[0] &&
-		texture_frame->format != AV_PIX_FMT_RGB0 && texture_frame->format != AV_PIX_FMT_RGBA)
+		texture_frame->format != AV_PIX_FMT_RGB0 && texture_frame->format != AV_PIX_FMT_RGBA && texture_frame->format != AV_PIX_FMT_YUV420P)
 		return UNHVD_ERROR_MSG("unhvd_unproject_depth_frame expects RGB0/RGBA texture data");
 
 	int size = depth_frame->width * depth_frame->height;
@@ -162,14 +172,14 @@ static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, con
 		delete [] pc->data;
 		delete [] pc->colors;
 		pc->data = new float3[size];
-		pc->colors = new color32[size];
+		pc->colors = new uint8_t[size]; // FIXME!! only setting the Y value as a byte for now. *3 / 2]; // YUV420P uses 12bpp
 		pc->size = size;
 		pc->used = 0;
 	}
 
 	uint16_t *depth_data = (uint16_t*)depth_frame->data[0];
 	//texture data is optional
-	uint32_t *texture_data = texture_frame ? (uint32_t*)texture_frame->data[0] : NULL;
+	uint8_t *texture_data = texture_frame ? (uint8_t*)texture_frame->data[0] : NULL;
 	int texture_linesize = texture_frame ? texture_frame->linesize[0] : 0;
 
 	hdu_depth depth = {depth_data, texture_data, depth_frame->width, depth_frame->height,
