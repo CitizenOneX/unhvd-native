@@ -172,7 +172,7 @@ static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, con
 		delete [] pc->data;
 		delete [] pc->colors;
 		pc->data = new float3[size];
-		pc->colors = new uint8_t[size]; // FIXME!! only setting the Y value as a byte for now. *3 / 2]; // YUV420P uses 12bpp
+		pc->colors = new uint8_t[size * 3 / 2]; // YUV420P uses 12bpp, i.e. 8bpp * 3 / 2
 		pc->size = size;
 		pc->used = 0;
 	}
