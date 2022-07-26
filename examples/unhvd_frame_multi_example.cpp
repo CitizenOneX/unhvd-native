@@ -31,6 +31,7 @@ int process_user_input(int argc, char **argv, unhvd_hw_config *hw_config, unhvd_
 
 //number of hardware decoders
 const int HW_DECODERS = 2;
+const int AUX_CHANNELS = 0;
 
 //decoder configuration
 const char *HARDWARE=NULL; //input through CLI, e.g. "vaapi"
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 	if(process_user_input(argc, argv, hw_config, &net_config) != 0)
 		return 1;
 
-	unhvd *network_decoder = unhvd_init(&net_config, hw_config, HW_DECODERS, NULL);
+	unhvd *network_decoder = unhvd_init(&net_config, hw_config, HW_DECODERS, AUX_CHANNELS, NULL);
 
 	if(!network_decoder)
 	{

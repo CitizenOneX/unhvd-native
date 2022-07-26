@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 	if(process_user_input(argc, argv, hw_config, &net_config) != 0)
 		return 1;
 
-	unhvd *network_decoder = unhvd_init(&net_config, hw_config, 2, &depth_config);
+	unhvd *network_decoder = unhvd_init(&net_config, hw_config, 2, 0, &depth_config);
 
 	if(!network_decoder)
 	{
