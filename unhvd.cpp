@@ -33,8 +33,11 @@ struct unhvd
 {
 	nhvd *network_decoder;
 	int decoders;
+	int auxes;
 
 	AVFrame *frame[UNHVD_MAX_DECODERS];
+	nhvd_frame raws[UNHVD_MAX_DECODERS + UNHVD_MAX_AUX_CHANNELS];
+
 	std::mutex mutex; //guards frame and point_cloud_shared
 
 	hdu *hardware_unprojector;
@@ -46,7 +49,9 @@ struct unhvd
 	unhvd():
 			network_decoder(NULL),
 			decoders(0),
+			auxes(0),
 			frame(), //zero out
+			raws(),
 			hardware_unprojector(NULL),
 			point_cloud(),
 			point_cloud_shared(),
@@ -56,7 +61,7 @@ struct unhvd
 
 struct unhvd *unhvd_init(
 	const unhvd_net_config *net_config,
-	const unhvd_hw_config *hw_config, int hw_size,
+	const unhvd_hw_config *hw_config, int hw_size, int aux_size,
 	const unhvd_depth_config *depth_config)
 {
 	nhvd_net_config nhvd_net = {net_config->ip, net_config->port, net_config->timeout_ms};
@@ -78,7 +83,7 @@ struct unhvd *unhvd_init(
 		nhvd_hw[i] = hw;
 	}
 
-	if( (u->network_decoder = nhvd_init(&nhvd_net, nhvd_hw, hw_size, 0)) == NULL)
+	if( (u->network_decoder = nhvd_init(&nhvd_net, nhvd_hw, hw_size, aux_size)) == NULL)
 		return unhvd_close_and_return_null(u, "failed to initialize NHVD");
 
 	u->decoders = hw_size;
@@ -120,7 +125,7 @@ static void unhvd_network_decoder_thread(unhvd *u)
 
 
 	while( u->keep_working &&
-	     ((status = nhvd_receive(u->network_decoder, frames) ) != NHVD_ERROR) )
+	     ((status = nhvd_receive_all(u->network_decoder, frames, u->raws) ) != NHVD_ERROR) )
 	{
 		if(status == NHVD_TIMEOUT)
 			continue; //keep working
@@ -146,6 +151,9 @@ static void unhvd_network_decoder_thread(unhvd *u)
 			u->point_cloud_shared = u->point_cloud;
 			u->point_cloud = temp;
 		}
+
+		// TODO remove after testing
+		cout << "Frame sizes: " << u->raws[0].size << ", " << u->raws[1].size << ", " << u->raws[2].size << ", " << u->raws[3].size << endl;
 	}
 
 	if(u->keep_working)

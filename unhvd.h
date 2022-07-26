@@ -115,7 +115,8 @@ struct unhvd_depth_config
 enum UNHVD_COMPILE_TIME_CONSTANTS
 {
 	UNHVD_MAX_DECODERS = 3, //!< max number of decoders in multi-frame decoding
-	UNHVD_NUM_DATA_POINTERS = 3 //!< max number of planes for planar image formats
+	UNHVD_NUM_DATA_POINTERS = 3, //!< max number of planes for planar image formats
+	UNHVD_MAX_AUX_CHANNELS = 1 //!< max number of auxilliary raw channels
 };
 
 /**
@@ -131,11 +132,11 @@ enum UNHVD_COMPILE_TIME_CONSTANTS
  */
 struct unhvd_frame
 {
-	int width; //!< width of frame in pixels
-	int height; //!< height of frame in pixels
-	int format; //!< FFmpeg pixel format
-	uint8_t *data[UNHVD_NUM_DATA_POINTERS]; //!< array of pointers to frame planes (e.g. Y plane and UV plane)
-	int linesize[UNHVD_NUM_DATA_POINTERS]; //!< array of strides of frame planes (row length including padding)
+	int width; //!< width of frame in pixels (or 0 for raw)
+	int height; //!< height of frame in pixels (or 0 for raw)
+	int format; //!< FFmpeg pixel format (or 0 for raw)
+	uint8_t *data[UNHVD_NUM_DATA_POINTERS]; //!< array of pointers to frame planes (e.g. Y plane and UV plane) - raw only has data[0]
+	int linesize[UNHVD_NUM_DATA_POINTERS]; //!< array of strides of frame planes (row length including padding) - raw only has linesize[0]
 };
 
 /**
@@ -184,6 +185,7 @@ enum unhvd_retval_enum
  * @param net_config network configuration
  * @param hw_config hardware decoders configuration of hw_size size
  * @param hw_size number of supplied hardware decoder configurations
+ * @param aux_size number of (raw, unencoded) auxilliary channels
  * @param depth_config unprojection configuration (may be NULL)
  * @return
  * - pointer to internal library data
@@ -191,9 +193,9 @@ enum unhvd_retval_enum
  *
  * @see unhvd_net_config, unhvd_hw_config, unhvd_depth_config
  */
-UNHVD_EXPORT struct unhvd * UNHVD_API unhvd_init(
-	const unhvd_net_config *net_config,
-	const unhvd_hw_config *hw_config, int hw_size,
+UNHVD_EXPORT struct unhvd* UNHVD_API unhvd_init(
+	const unhvd_net_config* net_config,
+	const unhvd_hw_config* hw_config, int hw_size, int aux_size,
 	const unhvd_depth_config *depth_config);
 
 /**
@@ -223,7 +225,7 @@ UNHVD_EXPORT void UNHVD_API unhvd_close(unhvd *u);
  *  Functions will calculate point clouds from depth maps only if non NULL ::unhvd_depth_config was passed to ::unhvd_init
  *
  * @param n pointer to internal library data
- * @param frame pointer to frame description data (single or array)
+ * @param frame pointer to frame description data (single or array) - returns array of decoded then raw frames
  * @param pc pointer to point cloud description data
  * @return
  * - begin functions
