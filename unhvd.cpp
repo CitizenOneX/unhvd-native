@@ -87,6 +87,7 @@ struct unhvd *unhvd_init(
 		return unhvd_close_and_return_null(u, "failed to initialize NHVD");
 
 	u->decoders = hw_size;
+	u->auxes = aux_size;
 
 	for(int i=0;i<hw_size;++i)
 	{
@@ -211,16 +212,25 @@ int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc)
 
 	bool new_data = false;
 
+	// check for new data in any decoded channel
 	for(int i=0;i<u->decoders;++i)
 		if(u->frame[i]->data[0] != NULL)
 			new_data = true;
+
+	// check for new data in any auxilliary channel
+	if(!new_data)
+		for (int i = 0; i < u->auxes; ++i)
+			if (u->raws[u->decoders + i].data[0] != NULL)
+				new_data = true;
 
 	//for user convinience, return ERROR if there is no new data
 	if(!new_data)
 		return UNHVD_ERROR;
 
-	if(frame)
-		for(int i=0;i<u->decoders;++i)
+	if (frame)
+	{
+		// copy decoded frames over
+		for (int i = 0; i < u->decoders; ++i)
 		{
 			frame[i].width = u->frame[i]->width;
 			frame[i].height = u->frame[i]->height;
@@ -230,6 +240,20 @@ int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc)
 			memcpy(frame[i].linesize, u->frame[i]->linesize, sizeof(frame[i].linesize));
 			memcpy(frame[i].data, u->frame[i]->data, sizeof(frame[i].data));
 		}
+
+		// copy auxilliary channels over
+		for (int i = 0; i < 1; ++i)
+		{
+			int j = u->decoders + i;
+			frame[j].width = 0;
+			frame[j].height = 0;
+			frame[j].format = 0;
+
+			//copy just an int and a pointer, not the actual data
+			frame[j].linesize[0] = u->raws[j].size;
+			frame[j].data[0] = u->raws[j].data;
+		}
+	}
 
 	if(pc && u->hardware_unprojector)
 	{
