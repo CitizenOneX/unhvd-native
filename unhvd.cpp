@@ -154,7 +154,7 @@ static void unhvd_network_decoder_thread(unhvd *u)
 		}
 
 		// TODO remove after testing
-		cout << "Frame sizes: " << u->raws[0].size << ", " << u->raws[1].size << ", " << u->raws[2].size << ", " << u->raws[3].size << endl;
+		//cout << "Frame sizes: " << u->raws[0].size << ", " << u->raws[1].size << ", " << u->raws[2].size << ", " << u->raws[3].size << endl;
 	}
 
 	if(u->keep_working)
@@ -220,7 +220,7 @@ int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc)
 	// check for new data in any auxilliary channel
 	if(!new_data)
 		for (int i = 0; i < u->auxes; ++i)
-			if (u->raws[u->decoders + i].data[0] != NULL)
+			if (u->raws[u->decoders + i].data != NULL)
 				new_data = true;
 
 	//for user convinience, return ERROR if there is no new data
