@@ -287,6 +287,7 @@ int unhvd_get_end(struct unhvd *u)
 		av_frame_unref(u->frame[i]);
 
 	// zero out the aux data so get_begin can tell if frames are new
+	// TODO check if the data needs to be freed
 	for (int i = 0; i < u->auxes; ++i)
 		u->raws[u->decoders + i].data = NULL;
 
