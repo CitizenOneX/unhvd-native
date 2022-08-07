@@ -157,8 +157,11 @@ static void unhvd_network_decoder_thread(unhvd *u)
 		//cout << "Frame sizes: " << u->raws[0].size << ", " << u->raws[1].size << ", " << u->raws[2].size << ", " << u->raws[3].size << endl;
 	}
 
-	if(u->keep_working)
+	if (u->keep_working)
+	{
 		cerr << "unhvd: network decoder fatal error" << endl;
+		u->keep_working = false; // signal the rest of the program that the network thread is finished
+	}
 
 	cerr << "unhvd: network decoder thread finished" << endl;
 }
@@ -214,16 +217,22 @@ int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc)
 
 	// check for new data in any decoded channel
 	for(int i=0;i<u->decoders;++i)
-		if(u->frame[i]->data[0] != NULL)
+		if (u->frame[i]->data[0] != NULL)
+		{
 			new_data = true;
+			break;
+		}
 
 	// check for new data in any auxilliary channel
 	if(!new_data)
 		for (int i = 0; i < u->auxes; ++i)
 			if (u->raws[u->decoders + i].data != NULL)
+			{
 				new_data = true;
+				break;
+			}
 
-	//for user convinience, return ERROR if there is no new data
+	//for user convenience, return ERROR if there is no new data
 	if(!new_data)
 		return UNHVD_ERROR;
 
@@ -273,8 +282,13 @@ int unhvd_get_end(struct unhvd *u)
 	if(u == NULL)
 		return UNHVD_ERROR;
 
+	// av_frame_unref zeroes out the frame data so get_begin can tell if frames are new
 	for(int i=0;i<u->decoders;++i)
 		av_frame_unref(u->frame[i]);
+
+	// zero out the aux data so get_begin can tell if frames are new
+	for (int i = 0; i < u->auxes; ++i)
+		u->raws[u->decoders + i].data = NULL;
 
 	u->mutex.unlock();
 
