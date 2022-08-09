@@ -145,7 +145,7 @@ struct unhvd_frame
 typedef float float3[3];
 
 /**
-  * @brief Vertex color data (rgba), currently only a as greyscale
+  * @brief Vertex color data (rgba)
   */
 typedef uint32_t color32;
 
@@ -160,7 +160,7 @@ typedef uint32_t color32;
 struct unhvd_point_cloud
 {
 	float3 *data; //!< array of point coordinates
-	uint8_t *colors; //!< array of point colors
+	color32 *colors; //!< array of point colors
 	int size; //!< size of array
 	int used; //!< number of elements used in array
 };

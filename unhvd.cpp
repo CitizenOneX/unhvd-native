@@ -184,7 +184,7 @@ static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, con
 		delete [] pc->data;
 		delete [] pc->colors;
 		pc->data = new float3[size];
-		pc->colors = new uint8_t[size * 3 / 2]; // NV12 uses 12bpp, i.e. 8bpp * 3 / 2
+		pc->colors = new color32[size]; // hdu will use NV12 output format from decoder and give an RGBA color32 back
 		pc->size = size;
 		pc->used = 0;
 	}
