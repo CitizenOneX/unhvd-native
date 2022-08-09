@@ -173,10 +173,10 @@ static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, con
 		(depth_frame->format != AV_PIX_FMT_P010LE && depth_frame->format != AV_PIX_FMT_P016LE && depth_frame->format != AV_PIX_FMT_YUV420P10LE))
 		return UNHVD_ERROR_MSG("unhvd_unproject_depth_frame expects uint16 p010le/p016le data");
 
-	// seems to be matching AV_PIX_FMT_YUV420P
+	// seems to be matching AV_PIX_FMT_NV12
 	if(texture_frame && texture_frame->data[0] &&
-		texture_frame->format != AV_PIX_FMT_RGB0 && texture_frame->format != AV_PIX_FMT_RGBA && texture_frame->format != AV_PIX_FMT_YUV420P)
-		return UNHVD_ERROR_MSG("unhvd_unproject_depth_frame expects RGB0/RGBA texture data");
+		texture_frame->format != AV_PIX_FMT_NV12)
+		return UNHVD_ERROR_MSG("unhvd_unproject_depth_frame expects NV12 texture data");
 
 	int size = depth_frame->width * depth_frame->height;
 	if(size != pc->size)
@@ -184,7 +184,7 @@ static int unhvd_unproject_depth_frame(unhvd *u, const AVFrame *depth_frame, con
 		delete [] pc->data;
 		delete [] pc->colors;
 		pc->data = new float3[size];
-		pc->colors = new uint8_t[size * 3 / 2]; // YUV420P uses 12bpp, i.e. 8bpp * 3 / 2
+		pc->colors = new uint8_t[size * 3 / 2]; // NV12 uses 12bpp, i.e. 8bpp * 3 / 2
 		pc->size = size;
 		pc->used = 0;
 	}
