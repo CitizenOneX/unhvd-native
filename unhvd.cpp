@@ -251,7 +251,7 @@ int unhvd_get_begin(unhvd *u, unhvd_frame *frame, unhvd_point_cloud *pc)
 		}
 
 		// copy auxilliary channels over
-		for (int i = 0; i < 1; ++i)
+		for (int i = 0; i < u->auxes; ++i)
 		{
 			int j = u->decoders + i;
 			frame[j].width = 0;
